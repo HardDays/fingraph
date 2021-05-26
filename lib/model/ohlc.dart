@@ -9,7 +9,7 @@ class Ohlc {
 
   factory Ohlc.fromJson(Map<String, dynamic> json) {
     return Ohlc(
-      d: json['d'] == null ? null : DateTime.parse(json['d'] as String),
+      d: DateTime.fromMillisecondsSinceEpoch(json['d']),
       o: (json['o'] as num)?.toDouble(),
       h: (json['h'] as num)?.toDouble(),
       l: (json['l'] as num)?.toDouble(),

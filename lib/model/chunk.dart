@@ -6,7 +6,7 @@ class Chunk {
 
   factory Chunk.fromJson(Map<String, dynamic> json) {
     return Chunk(
-      d: json['d'] == null ? null : DateTime.parse(json['d'] as String),
+      d: DateTime.fromMillisecondsSinceEpoch(json['d']),
       q: (json['q'] as num)?.toDouble());
   }
   Map<String, dynamic> toJson() => <String, dynamic>{
