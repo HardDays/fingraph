@@ -10,10 +10,10 @@ class Ohlc {
   factory Ohlc.fromJson(Map<String, dynamic> json) {
     return Ohlc(
       d: DateTime.fromMillisecondsSinceEpoch(json['d']),
-      o: (json['o'] as num)?.toDouble(),
-      h: (json['h'] as num)?.toDouble(),
-      l: (json['l'] as num)?.toDouble(),
-      c: (json['c'] as num)?.toDouble()
+      o: (json['o'] as num)?.toDouble(), // open
+      h: (json['h'] as num)?.toDouble(), // hight
+      l: (json['l'] as num)?.toDouble(), // low
+      c: (json['c'] as num)?.toDouble()  // close
     );
   }
   Map<String, dynamic> toJson() => <String, dynamic>{
