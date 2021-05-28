@@ -1,3 +1,4 @@
+import 'package:fingraph/data/websocket_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -40,8 +41,11 @@ class _PagesState extends State<Pages> {
       ),
       bottomNavigationBar: _BottomNavigationBar(context),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),// Text(gLocale.fab_qr),
-        onPressed: () => _rp.addPoint(_page == 0 ? TypeChart.Cartesian : TypeChart.Candle, null),
+        child: _rp.isStart ? Icon(Icons.stop) : Icon(Icons.play_arrow), //Icon(Icons.add),
+        onPressed: () {
+          _rp.onStartStop(TypeChart.Cartesian);//_rp.addPoint(_page == 0 ? TypeChart.Cartesian : TypeChart.Candle),
+          setState(() { });
+        }
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,    );
   }
@@ -62,7 +66,7 @@ class _PagesState extends State<Pages> {
           BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: "Cartesian"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Candle")
         ],
-        onTap: (page) => _pageController.jumpToPage(page),
+        // onTap: (page) => _pageController.jumpToPage(page),
         currentIndex: _page,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,

@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:fingraph/data/websocket_api.dart';
+import 'package:fingraph/model/src_api.dart';
+import 'package:fingraph/utils/const.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -18,44 +22,87 @@ import '../model/quote.dart';
 
 //
 // Stream<int> quoteStream(int max) async* {
-//   Random r = Random();
 //   for(var i=0; i <= max; i++) {
-//     chunk.add(Quote(
-//         d: DateTime.now().add(Duration(milliseconds: r.nextInt(100))), q: 0.90 + (r.nextInt(9).toDouble() / 100)));
+//     addRandQuote();
 //     await Future.delayed(Duration(microseconds: 100));
 //     yield i;
 //   }
 // }
+// Repository() {
+//   iniChunkLine();
+//   iniChunkCandle();
+// }
 
 enum TypeChart { Cartesian, Candle }
 
-class Repository extends ChangeNotifier {
+class Repository {
+  final SrcApi src = WebSocketSrc();
+  final Random _rand = Random();
+
   List<Quote> chunkQuote = [];
   List<Ohlc> chunkOhlc = [];
-  final Random _rand = Random();
-  ChartSeriesController controllerCartesian;
-  ChartSeriesController controllerCandle;
+  ChartSeriesController _controller;
+  DateTime _dmin;
+  DateTime _dmax;
 
-  void setControllerCartesian(ChartSeriesController c) => controllerCartesian = c;
-  void setControllerCandle(ChartSeriesController c) => controllerCandle = c;
+  bool _isStart = false;
+  bool get isStart => _isStart;
+  DateTime get dmin => _dmin;
+  DateTime get dmax => _dmax;
 
-  Repository() {
-    // iniChunkLine();
-    // iniChunkCandle();
-    _iniChunkQuote();
-    _iniChunkOhlc();
+  void setDTBorder(DateTime min, DateTime max) {
+    _dmin = min;
+    _dmax = max;
   }
 
-  void _iniChunkQuote() {
-    for (var i = 0; i < 15; i++) {
-      addRandQuote();
+  void setChartController(ChartSeriesController c) => _controller = c;
+
+  Repository() {
+    _iniChunkQuote();
+    _iniChunkOhlc();
+    src.getAssets();
+  }
+
+  void onStartStop(TypeChart typeChart) {
+    if(!_isStart) {
+      _isStart = true;
+      src.start("tick.aud_usd_afx", DataType.quote, (a) => _onData);
+    } else {
+      _isStart = false;
+      src.stop();
     }
+  }
+
+  void _onData(dynamic jsonString) {
+    List<int> idxAdd = [];
+    List<int> idxDel = [];
+    int idxLast = chunkQuote.length - 1;
+    int idxCurr = chunkQuote.length;
+    try {
+      for (var v in json.decode(jsonString)) {
+        chunkQuote.add(Quote.fromJson(v));
+        idxAdd.add(idxCurr++);
+      }
+      if(chunkQuote.length > kMaxLenData) {
+        for(var i = 0; i < (kMaxLenData - chunkQuote.length); i++) {
+          idxDel.add(i);
+        }
+        chunkQuote.removeRange(0, kMaxLenData - chunkQuote.length);
+      }
+      _controller?.updateDataSource(addedDataIndexes: idxAdd, removedDataIndexes: idxDel);
+
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // Generating test data
+  void _iniChunkQuote() {
+    for (var i = 0; i < 15; i++) { addRandQuote(); }
   }
 
   void _iniChunkOhlc() {
-    for (var i = 0; i < 15; i++) {
-      addRandOhls();
-    }
+    for (var i = 0; i < 15; i++) { addRandOhls();  }
   }
 
   void addRandQuote() {
@@ -86,26 +133,21 @@ class Repository extends ChangeNotifier {
     chunkOhlc.add(Ohlc(d: d, o: o, h: h, l: l, c: c));
   }
 
-  void addPoint(TypeChart typeChart, ChartSeriesController controller) {
+  void addPoint(TypeChart typeChart) {
     int len = 0;
     if (typeChart == TypeChart.Cartesian) {
       if (chunkQuote.length > 10) chunkQuote.removeAt(0);
       addRandQuote();
       len = chunkQuote.length;
-      controllerCartesian?.updateDataSource(
-          addedDataIndexes: <int>[len - 1],
-          removedDataIndexes: (len <= 10 ? <int>[] : <int>[0]));
     }
     if (typeChart == TypeChart.Candle) {
       if (chunkOhlc.length > 10) chunkOhlc.removeAt(0);
       addRandQuote();
       len = chunkOhlc.length;
-      controllerCandle?.updateDataSource(
-          addedDataIndexes: <int>[len - 1],
-          removedDataIndexes: (len <= 10 ? <int>[] : <int>[0]));
     }
 
-    //Here accessed the public method of the series.
-    notifyListeners();
+    _controller?.updateDataSource(
+        addedDataIndexes: <int>[len - 1],
+        removedDataIndexes: (len <= 10 ? <int>[] : <int>[0]));
   }
 }

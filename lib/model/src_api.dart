@@ -1,14 +1,20 @@
 // Источники данных для графиков
+
+import 'asset.dart';
+
 enum DataType {quote, ohlc}
 
+typedef OnData = void Function(dynamic a);
+typedef OnError = void Function(Object error);
+
 abstract class SrcApi {
+  List<Asset> assets;
 
-  // initializing
-  Future<bool> iniSrc() { }
+  // start receiving data
+  bool start(String symbol, DataType type, OnData onData, {OnError onError}) { }
 
-  Future<void> start(DataType type) {}
+  // stop receiving data
+  void stop() {}
 
-  Stream<dynamic> getData(DataType type) {}
-
-  void stop(DataType type) {}
+  Future<String> getAssets() async {}
 }

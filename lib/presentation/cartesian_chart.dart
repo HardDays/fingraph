@@ -17,9 +17,7 @@ class CartesianChart extends StatefulWidget {
 
 class _CartesianChartState extends State<CartesianChart> {
   ZoomPanBehavior _zoomPanBehavior;
-  DateTime _dmin;
-  DateTime _dmax;
-  Repository get _repository => widget.rp;
+  Repository get _rp => widget.rp;
 
   @override
   void initState() {
@@ -31,8 +29,11 @@ class _CartesianChartState extends State<CartesianChart> {
         enableDoubleTapZooming: true,
         enableMouseWheelZooming: true
     );
-    _dmin = _repository.chunkQuote.first.d;
-    _dmax = _repository.chunkQuote.last.d;
+    // TODO I will delete it later
+    _rp.setDTBorder(
+        _rp.chunkQuote.first.d,
+        _rp.chunkQuote.last.d
+    );
     super.initState();
   }
 
@@ -56,7 +57,7 @@ class _CartesianChartState extends State<CartesianChart> {
             onZoomEnd: _zoomEnd,
             ),
       ),
-      MinMax(context, _dmin, _dmax),
+      MinMax(context, _rp.dmin, _rp.dmax),
     ]);
   }
 
@@ -68,7 +69,7 @@ class _CartesianChartState extends State<CartesianChart> {
 
   LineSeries<Quote, DateTime> _getData() {
     return LineSeries<Quote, DateTime>(
-      dataSource: _repository.chunkQuote,
+      dataSource: _rp.chunkQuote,
       xValueMapper: (Quote sales, _) => sales.d,
       yValueMapper: (Quote sales, _) => sales.q,
       name: 'Sales',
@@ -76,7 +77,7 @@ class _CartesianChartState extends State<CartesianChart> {
           isVisible: true, height: 4, width: 4, shape: DataMarkerType.circle, borderWidth: 2, borderColor: Colors.red),
       dataLabelSettings: DataLabelSettings(isVisible: false),
       onRendererCreated: (ChartSeriesController controller) {
-        _repository.setControllerCartesian(controller);
+        _rp.setChartController(controller);
       },
     );
   }
@@ -84,8 +85,10 @@ class _CartesianChartState extends State<CartesianChart> {
   void _actRange(ActualRangeChangedArgs args) {
     if (args.orientation == AxisOrientation.horizontal) {
       print("* Cartesian _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
-      _dmin = DateTime.fromMillisecondsSinceEpoch(args.visibleMin);
-      _dmax = DateTime.fromMillisecondsSinceEpoch(args.visibleMax);
+      _rp.setDTBorder(
+        DateTime.fromMillisecondsSinceEpoch(args.visibleMin),
+        DateTime.fromMillisecondsSinceEpoch(args.visibleMax)
+      );
     }
   }
 }

@@ -59,7 +59,6 @@ class _CandleChartState extends State<CandleChart> {
   }
 
   void _zoomEnd(ZoomPanArgs args) {
-    print("* onZoomEnd");
     if (args.axis is DateTimeAxis) {
       setState(() {});
     }
@@ -76,7 +75,7 @@ class _CandleChartState extends State<CandleChart> {
       name: 'Sales',
       dataLabelSettings: DataLabelSettings(isVisible: false),
       onRendererCreated: (ChartSeriesController controller) {
-        _repository.setControllerCandle(controller);
+        _repository.setChartController(controller);
       },
     );
   }
