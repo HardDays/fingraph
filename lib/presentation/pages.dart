@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'candle_chart.dart';
 import 'cartesian_chart.dart';
-import '../main.dart';
+import '../utils/const.dart';
 import '../data/repository.dart';
 
 class Pages extends StatefulWidget {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+
+import 'utils/const.dart';
 import 'presentation/pages.dart';
 
 void main() => runApp(MyApp());
-
-const String kTitle = 'Syncfusion Flutter chart';
 
 class MyApp extends StatelessWidget {
   @override
