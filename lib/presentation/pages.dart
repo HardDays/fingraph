@@ -1,4 +1,3 @@
-import 'package:fingraph/data/websocket_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -41,13 +40,13 @@ class _PagesState extends State<Pages> {
       ),
       bottomNavigationBar: _BottomNavigationBar(context),
       floatingActionButton: FloatingActionButton(
-        child: _rp.isStart ? Icon(Icons.stop) : Icon(Icons.play_arrow), //Icon(Icons.add),
-        onPressed: () {
-          _rp.onStartStop(TypeChart.Cartesian);//_rp.addPoint(_page == 0 ? TypeChart.Cartesian : TypeChart.Candle),
-          setState(() { });
-        }
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,    );
+          child: _rp.isStart ? Icon(Icons.stop) : Icon(Icons.play_arrow), //Icon(Icons.add),
+          onPressed: () {
+            _rp.onStartStop();
+            setState(() {});
+          }),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
   }
 
   @override

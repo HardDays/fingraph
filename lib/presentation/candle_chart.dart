@@ -4,7 +4,6 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../data/repository.dart';
 import '../model/ohlc.dart';
-import 'minmax_widget.dart';
 
 class CandleChart extends StatefulWidget {
   final Repository rp;
@@ -17,9 +16,7 @@ class CandleChart extends StatefulWidget {
 class _CandleChartState extends State<CandleChart> {
   ZoomPanBehavior _zoomPanBehavior;
   final Random r = Random();
-  DateTime _dmin;
-  DateTime _dmax;
-  Repository get _repository => widget.rp;
+  Repository get _rp => widget.rp;
 
   @override
   void initState() {
@@ -31,8 +28,7 @@ class _CandleChartState extends State<CandleChart> {
         enableDoubleTapZooming: true,
         enableMouseWheelZooming: true
     );
-    _dmin = _repository.chunkQuote.first.d;
-    _dmax = _repository.chunkQuote.last.d;
+    _rp.iniData();
     super.initState();
   }
 
@@ -54,7 +50,7 @@ class _CandleChartState extends State<CandleChart> {
           onZoomEnd: _zoomEnd,
         ),
       ),
-      MinMax(context, _dmin, _dmax),
+      //MinMax(context),
     ]);
   }
 
@@ -66,7 +62,7 @@ class _CandleChartState extends State<CandleChart> {
 
   CandleSeries<Ohlc, DateTime> _getData() {
     return CandleSeries(
-        dataSource: _repository.chunkOhlc,
+        dataSource: _rp.chunkData,
         xValueMapper: (Ohlc sales, _) => sales.d, // sales.d.toIso8601String(),
         lowValueMapper: (Ohlc sales, _) => sales.l,
         highValueMapper: (Ohlc sales, _) => sales.h,
@@ -75,7 +71,7 @@ class _CandleChartState extends State<CandleChart> {
       name: 'Sales',
       dataLabelSettings: DataLabelSettings(isVisible: false),
       onRendererCreated: (ChartSeriesController controller) {
-        _repository.setChartController(controller);
+        _rp.setChartController(controller);
       },
     );
   }
@@ -84,8 +80,10 @@ class _CandleChartState extends State<CandleChart> {
    void _actRange(ActualRangeChangedArgs args) {
     if (args.orientation == AxisOrientation.horizontal) {
       print("* Candle _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
-      _dmin = DateTime.fromMillisecondsSinceEpoch(args.visibleMin);
-      _dmax = DateTime.fromMillisecondsSinceEpoch(args.visibleMax);
+      _rp.setDTBorder(
+          DateTime.fromMillisecondsSinceEpoch(args.visibleMin),
+          DateTime.fromMillisecondsSinceEpoch(args.visibleMax)
+      );
     }
   }
 }

@@ -7,34 +7,6 @@ import '../model/src_api.dart';
 import '../model/asset.dart';
 import '../utils/const.dart';
 
-/* Notes:
-  // Content-Type: application/json
-  // Authorization: Bearer <TOKEN>
-
-  // Все передаваемые данные — простые записи, сериализованные в JSON[3].
-  // Запрос — вызов определённого метода, предоставляемого удалённой системой.
-  // Он должен содержать три обязательных свойства:
-  // - method — строка с именем вызываемого метода.
-  // - params — массив данных, которые должны быть переданы методу, как параметры.
-  // - id — значение любого типа, которое используется для установки соответствия
-  //   между запросом и ответом.
-
-  // {"jsonrpc":"2.0","method":"subscribe","params":[{"channels":["tick.aud_usd_afx"]}]}
-
-  // Сервер должен отослать правильный ответ на каждый полученный запрос.
-  // Ответ должен содержать следующие свойства:
-  // - result — данные, которые вернул метод. Если произошла ошибка во время выполнения метода,
-  //   это свойство должно быть установлено в null.
-  // - error — код ошибки, если произошла ошибка во время выполнения метода, иначе null.
-  // - id — то же значение, что и в запросе, к которому относится данный ответ.
-
-  final channel = IOWebSocketChannel.connect('ws://localhost:1234');
-  channel.stream.listen((message) {
-    channel.sink.add('received!');
-    channel.sink.close(status.goingAway);
-  });
-*/
-
 class WebSocketSrc implements SrcApi {
 
   List<Asset> assets = [];
@@ -42,39 +14,13 @@ class WebSocketSrc implements SrcApi {
 
   IOWebSocketChannel _channel;
 
-  // List<Quote> quoteList;
-  // List<Ohlc> ohlsList;
-
-  @override
-  bool start(String symbol, DataType type, OnData onData, {OnError onError}) {
-    try {
-      _channel = IOWebSocketChannel.connect("${kWsUrl}?token=${kWsToken}");
-      _channel.stream.listen((event) => onData, cancelOnError: true, onError: (e)=> print("**error: $e"));
-      const _request = '{"jsonrpc":"2.0","method":"subscribe","params":[{"channels":["tick.aud_usd_afx"]}]}';
-      _channel.sink.add(_request);
-      return true;
-    } catch (e) {
-      print(e);
-      return false;
-    }
-  }
-
-  void onError(Object error) {
-    print("* Error: $error");
-  }
-
-  @override
-  void stop() {
-    _channel?.sink.close(status.goingAway);
-  }
-
   @override
   Future<String> getAssets() async {
     String error = "";
     String url = kWsUrlDoc;
     var req;
     Client client = Client();
-    Map<String, String> userHeader = {"Authorization": "Bearer ${kWsToken}", "Content-Type": "application/json"};
+    Map<String, String> userHeader = {"Authorization": "Bearer $kWsToken", "Content-Type": "application/json"};
     if(assets.length > 0) {
       assets.clear();
     }
@@ -100,5 +46,37 @@ class WebSocketSrc implements SrcApi {
     // print("${utf8decoder.convert(req.bodyBytes) ?? ""}");
     return error;
   }
+
+  @override
+  bool start(String symbol, OnData onData, {OnError onError}) {
+    bool res = false;
+    print("* websocket.start");
+    try {
+      _channel = IOWebSocketChannel.connect(Uri.parse("${kWsUrl}?token=$kWsToken"));
+      _channel.stream.listen((event) => onData, cancelOnError: true, onError: _onError, onDone: _onDone);
+      //_channel.stream.listen((event) => _testData, cancelOnError: true, onError: _onError, onDone: _onDone);
+      print("* websocket.listen");
+
+      const _request = kWsExampleFirstQuery;
+      _channel.sink.add(_request);
+
+      print("* websocket.sink.add($_request)");
+      res = true;
+    } catch (e) {
+      print("* websocket.catch error: ${e.toString()}");
+    }
+    return res;
+  }
+
+  //void _testData(dynamic msg) => print("* websocket.onData: $msg");
+  void _onError(Object error) => print("* websocket._onError: $error");
+  void _onDone() => print("* websocket._onDone");
+
+  @override
+  void stop() {
+    print("* websocket.stop");
+    _channel?.sink.close(status.goingAway);
+  }
+
 }
 

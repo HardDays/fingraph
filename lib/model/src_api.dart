@@ -10,11 +10,11 @@ typedef OnError = void Function(Object error);
 abstract class SrcApi {
   List<Asset> assets;
 
+  Future<String> getAssets() async {}
+
   // start receiving data
-  bool start(String symbol, DataType type, OnData onData, {OnError onError}) { }
+  bool start(String symbol, OnData onData, {OnError onError}) { }
 
   // stop receiving data
   void stop() {}
-
-  Future<String> getAssets() async {}
 }

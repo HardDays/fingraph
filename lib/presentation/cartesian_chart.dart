@@ -3,9 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../data/repository.dart';
-import '../model/quote.dart';
 import '../utils/util.dart';
-import 'minmax_widget.dart';
 
 class CartesianChart extends StatefulWidget {
   final Repository rp;
@@ -29,11 +27,7 @@ class _CartesianChartState extends State<CartesianChart> {
         enableDoubleTapZooming: true,
         enableMouseWheelZooming: true
     );
-    // TODO I will delete it later
-    _rp.setDTBorder(
-        _rp.chunkQuote.first.d,
-        _rp.chunkQuote.last.d
-    );
+    _rp.iniData();
     super.initState();
   }
 
@@ -51,13 +45,13 @@ class _CartesianChartState extends State<CartesianChart> {
             title: ChartTitle(text: 'Cartesian chart'),
             legend: Legend(isVisible: false),
             tooltipBehavior: TooltipBehavior(enable: true),
-            series: <ChartSeries<Quote, DateTime>>[_getData()],
+            series: <ChartSeries<dynamic, DateTime>>[_getData()],
             onActualRangeChanged: _actRange,
             zoomPanBehavior: _zoomPanBehavior,
             onZoomEnd: _zoomEnd,
             ),
       ),
-      MinMax(context, _rp.dmin, _rp.dmax),
+      //MinMax(context),
     ]);
   }
 
@@ -67,11 +61,11 @@ class _CartesianChartState extends State<CartesianChart> {
     }
   }
 
-  LineSeries<Quote, DateTime> _getData() {
-    return LineSeries<Quote, DateTime>(
-      dataSource: _rp.chunkQuote,
-      xValueMapper: (Quote sales, _) => sales.d,
-      yValueMapper: (Quote sales, _) => sales.q,
+  LineSeries<dynamic, DateTime> _getData() {
+    return LineSeries<dynamic, DateTime>(
+      dataSource: _rp.chunkData,
+      xValueMapper: (dynamic tick, _) => tick.d,
+      yValueMapper: (dynamic tick, _) => tick.q,
       name: 'Sales',
       markerSettings: MarkerSettings(
           isVisible: true, height: 4, width: 4, shape: DataMarkerType.circle, borderWidth: 2, borderColor: Colors.red),
@@ -84,7 +78,7 @@ class _CartesianChartState extends State<CartesianChart> {
   //ChartActualRangeChangedCallback
   void _actRange(ActualRangeChangedArgs args) {
     if (args.orientation == AxisOrientation.horizontal) {
-      print("* Cartesian _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
+      //print("* Cartesian _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
       _rp.setDTBorder(
         DateTime.fromMillisecondsSinceEpoch(args.visibleMin),
         DateTime.fromMillisecondsSinceEpoch(args.visibleMax)
