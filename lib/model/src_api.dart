@@ -2,19 +2,18 @@
 
 import 'asset.dart';
 
-enum DataType {quote, ohlc}
-
 typedef OnData = void Function(dynamic a);
 typedef OnError = void Function(Object error);
 
 abstract class SrcApi {
   List<Asset> assets;
 
-  Future<String> getAssets() async {}
+  Future<String> getAssets();
 
   // start receiving data
-  bool start(String symbol, OnData onData, {OnError onError}) { }
+  bool start(String symbol, OnData onData, {OnError onError});
 
   // stop receiving data
-  void stop() {}
-}
+  void stop();
+
+  }

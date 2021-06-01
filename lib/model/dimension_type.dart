@@ -1,0 +1,4 @@
+enum DimensionType {
+  tick,
+  ohlc
+}

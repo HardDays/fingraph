@@ -17,7 +17,7 @@ class WebSocketSrc implements SrcApi {
   @override
   Future<String> getAssets() async {
     String error = "";
-    String url = kWsUrlDoc;
+    String url = kUrlAssests;
     var req;
     Client client = Client();
     Map<String, String> userHeader = {"Authorization": "Bearer $kWsToken", "Content-Type": "application/json"};
@@ -52,7 +52,7 @@ class WebSocketSrc implements SrcApi {
     bool res = false;
     print("* websocket.start");
     try {
-      _channel = IOWebSocketChannel.connect(Uri.parse("${kWsUrl}?token=$kWsToken"));
+      _channel = IOWebSocketChannel.connect(Uri.parse("${kWsUrlQuotes}?token=$kWsToken"));
       _channel.stream.listen(onData, cancelOnError: true, onError: onError, onDone: _onDone);
       //_channel.stream.listen(_testData, cancelOnError: false, onError: _onError, onDone: _onDone);
       print("* websocket.listen");
