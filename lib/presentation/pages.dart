@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'candle_chart.dart';
 import 'cartesian_chart.dart';
@@ -14,13 +15,16 @@ class Pages extends StatefulWidget {
 
 class _PagesState extends State<Pages> {
   final PageController _pageController = PageController();
-  final Repository _rp = Repository();
+//  final Repository _rp = Repository();
   int _page;
+  Repository _rp;
+
 
   @override
   void initState() {
     super.initState();
     _page = 0;
+    _rp = Provider.of<Repository>(context, listen: false);
   }
 
   @override
@@ -40,11 +44,10 @@ class _PagesState extends State<Pages> {
       ),
       bottomNavigationBar: _BottomNavigationBar(context),
       floatingActionButton: FloatingActionButton(
-          child: _rp.isStart ? Icon(Icons.stop) : Icon(Icons.play_arrow), //Icon(Icons.add),
-          onPressed: () {
-            _rp.onStartStop();
-            setState(() {});
-          }),
+          child: Consumer<Repository>(builder: (context, rp, _) => (rp.isStart ? Icon(Icons.stop) : Icon(Icons.play_arrow))), //Icon(Icons.add),
+          onPressed: () //=> _rp.onStartStop()
+          { _rp.onStartStop(); setState(() {}); }
+          ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
@@ -65,7 +68,7 @@ class _PagesState extends State<Pages> {
           BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: "Cartesian"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Candle")
         ],
-        // onTap: (page) => _pageController.jumpToPage(page),
+        onTap: (page) => _pageController.jumpToPage(page),
         currentIndex: _page,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,

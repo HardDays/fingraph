@@ -18,14 +18,19 @@ class TestData<T extends Dimension> extends SrcApi {
   DateTime _dt = DateTime.now();
   StreamSubscription<dynamic> _sub;
 
-  Stream<String> _tickStream(DateTime dt) async* {
+  Stream<String> _dimensionStream(DateTime dt) async* {
+    WsMsg msg;
     try {
       for(var i=0; i < kMaxLenData; i++) {
         await Future.delayed(Dimension.addDt);
-        Tick tick =  Tick().getRandom(dt);
-        dt = tick.d;
-        WsMsg msg = WsMsg(jsonrpc: "2.0", method: "q", params: json.encode(tick.toJson()));
-        //print("* testdata.dataStream: $msg");
+
+          // TODO just for Tick. We need to add handling for OHLC..
+          Tick tick =  Tick().getRandom(dt);
+          dt = tick.d;
+          msg = WsMsg(jsonrpc: 2, method: "q", params: tick); //json.encode(tick.toJson()));
+          // ----------------
+
+        //print("* testdata.dataStream: ${msg.toString()}");
         yield json.encode(msg.toJson());
       }
     } catch (e) {
@@ -37,8 +42,9 @@ class TestData<T extends Dimension> extends SrcApi {
   bool start(String symbol, OnData onData, {OnError onError}) {
     bool res = false;
     print("* testdata.start");
+    ;
     try {
-      final Stream<String> stream = _tickStream(_dt);
+      final Stream<String> stream = _dimensionStream(_dt);
       if(_sub != null) _sub.cancel();
       _sub = stream.listen(onData, onError: onError ?? _onError, onDone: _onDone);
       res = true;

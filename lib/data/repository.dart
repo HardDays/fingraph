@@ -1,20 +1,18 @@
 import 'dart:convert';
-import 'package:fingraph/model/ohlc.dart';
 import 'package:fingraph/model/tick.dart';
 import 'package:fingraph/model/wsmsg.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../data/testdata_api.dart';
-//import '../data/websocket_api.dart';
 import '../model/dimension.dart';
 import '../model/src_api.dart';
-import '../utils/const.dart';
 
 enum TypeChart { Cartesian, Candle }
 
 class Repository with ChangeNotifier  {
-  final SrcApi src = TestData<Tick>(); // WebSocketSrc();
+  final SrcApi src = TestData<Tick>();
+//  final SrcApi src = WebSocketSrc();
 
   List<dynamic> chunkData = [];
 
@@ -32,7 +30,7 @@ class Repository with ChangeNotifier  {
   void setDTBorder(DateTime min, DateTime max) {
     _dmin = min ?? DateTime(2021);
     _dmax = max ?? DateTime(2021);
-    notifyListeners();
+    //notifyListeners();
   }
 
   void setChartController(ChartSeriesController c) => _controller = c;
@@ -68,27 +66,23 @@ class Repository with ChangeNotifier  {
 
   // add a new item in list
   void _onData(dynamic jsonMsg) {
-    int len = chunkData.length;
+    List<int> aDI = [];
+    List<int> rDI = [];
 
     WsMsg wsMsg;
     Dimension value;
     try {
       wsMsg = WsMsg.fromJson(json.decode(jsonMsg));
-      if(wsMsg.method == kWsMethodTick) {
-        value = Tick.fromJson(json.decode(wsMsg.params));
-//        print("* repository.onData.value: ${json.encode(value.toJson())}");
-      }
-      if(wsMsg.method == kWsMethodOhlc) {
-        value = Ohlc.fromJson(json.decode(wsMsg.params));
+      value = wsMsg.params;
+      if(chunkData.length >= 50) {
+        chunkData.removeRange(0, 1);
+        rDI.add(0);
       }
       chunkData.add(value);
-      if(chunkData.length > kMaxLenData) {
-        chunkData.removeRange(0, 0);
-        _controller?.updateDataSource(addedDataIndex: len, removedDataIndex: 0);
-      } else {
-        _controller?.updateDataSource(addedDataIndex: len, updatedDataIndex: len-1);
-        _controller?.seriesRenderer;//.animate();
-      }
+      aDI.add(chunkData.length-1);
+      _controller?.updateDataSource(addedDataIndexes: aDI, removedDataIndexes: rDI);
+      //_controller?.animate();
+
       // при обновлении, должно вызываться через ChartActualRangeChangedCallback
       // но если потребуется - добавить:
       //setDTBorder(chunkData.first.d, chunkData.last.d);

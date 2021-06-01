@@ -53,8 +53,8 @@ class WebSocketSrc implements SrcApi {
     print("* websocket.start");
     try {
       _channel = IOWebSocketChannel.connect(Uri.parse("${kWsUrl}?token=$kWsToken"));
-      _channel.stream.listen((event) => onData, cancelOnError: true, onError: _onError, onDone: _onDone);
-      //_channel.stream.listen((event) => _testData, cancelOnError: true, onError: _onError, onDone: _onDone);
+      _channel.stream.listen(onData, cancelOnError: true, onError: onError, onDone: _onDone);
+      //_channel.stream.listen(_testData, cancelOnError: false, onError: _onError, onDone: _onDone);
       print("* websocket.listen");
 
       const _request = kWsExampleFirstQuery;
@@ -68,8 +68,8 @@ class WebSocketSrc implements SrcApi {
     return res;
   }
 
-  //void _testData(dynamic msg) => print("* websocket.onData: $msg");
-  void _onError(Object error) => print("* websocket._onError: $error");
+  // void _testData(dynamic msg) => print("* websocket.onData: ${msg.toString()}");
+  // void _onError(Object error) => print("* websocket._onError: $error");
   void _onDone() => print("* websocket._onDone");
 
   @override

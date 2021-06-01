@@ -1,20 +1,22 @@
 import 'dart:core';
+import 'package:fingraph/model/tick.dart';
 
 // example response:
 // {"jsonrpc":"2.0","method":"q","params":{"i":56, "d":1622444215131, "q":0.77269}}
 
 class WsMsg<T> {
-  String jsonrpc;
+  int jsonrpc;
   String method;
-  String params;
+  dynamic params;
 
   WsMsg({this.jsonrpc, this.method, this.params});
 
   factory WsMsg.fromJson(Map<String, dynamic> json) {
+    String m = json['method'] as String;
     return WsMsg(
-        jsonrpc: json['jsonrpc'] as String,
+        jsonrpc: (json['jsonrpc'] as num)?.toInt(),
         method: json['method'] as String,
-        params: json['params'] as String);
+        params: (m == "q") ? Tick.fromJson(json['params']) : json['params']);
     }
 
   Map<String, dynamic> toJson() => <String, dynamic>{

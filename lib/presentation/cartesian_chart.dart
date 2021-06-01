@@ -4,6 +4,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../data/repository.dart';
 import '../utils/util.dart';
+import 'minmax_widget.dart';
 
 class CartesianChart extends StatefulWidget {
   final Repository rp;
@@ -40,7 +41,14 @@ class _CartesianChartState extends State<CartesianChart> {
         child: SfCartesianChart(
             axisLabelFormatter: Util.tsFormatter,
             primaryXAxis: DateTimeAxis(
-              dateFormat: DateFormat.ms()
+              dateFormat: DateFormat.Hms(),
+                intervalType: DateTimeIntervalType.seconds
+            ),
+            primaryYAxis: NumericAxis(
+                //minimum: 0.5,
+                // visibleMaximum: 2.0
+                //, visibleMinimum: 0.5
+                //anchorRangeToVisiblePoints: true
             ),
             title: ChartTitle(text: 'Cartesian chart'),
             legend: Legend(isVisible: false),
@@ -49,9 +57,11 @@ class _CartesianChartState extends State<CartesianChart> {
             onActualRangeChanged: _actRange,
             zoomPanBehavior: _zoomPanBehavior,
             onZoomEnd: _zoomEnd,
+
+            enableAxisAnimation: true
             ),
       ),
-      //MinMax(context),
+      MinMax(context),
     ]);
   }
 
@@ -78,11 +88,16 @@ class _CartesianChartState extends State<CartesianChart> {
   //ChartActualRangeChangedCallback
   void _actRange(ActualRangeChangedArgs args) {
     if (args.orientation == AxisOrientation.horizontal) {
-      //print("* Cartesian _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
+      print("* Cartesian _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
       _rp.setDTBorder(
         DateTime.fromMillisecondsSinceEpoch(args.visibleMin),
         DateTime.fromMillisecondsSinceEpoch(args.visibleMax)
       );
     }
+    // if (args.orientation == AxisOrientation.vertical) {
+    //   //print("* Cartesian _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
+    //   args.actualMin = 0.8;
+    //   args.actualMax = 1.0;
+    // }
   }
 }
