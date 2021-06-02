@@ -46,7 +46,7 @@ class _PagesState extends State<Pages> {
       floatingActionButton: FloatingActionButton(
           child: Consumer<Repository>(builder: (context, rp, _) => (rp.isStart ? Icon(Icons.stop) : Icon(Icons.play_arrow))), //Icon(Icons.add),
           onPressed: () //=> _rp.onStartStop()
-          { _rp.onStartStop(); setState(() {}); }
+          async { await _rp.onStartStop(); setState(() {}); }
           ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );

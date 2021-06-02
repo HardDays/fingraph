@@ -6,9 +6,8 @@ typedef OnData = void Function(dynamic a);
 typedef OnError = void Function(Object error);
 
 abstract class SrcApi {
-  List<Asset> assets;
 
-  Future<String> getAssets();
+  Future<List<Asset>> getAssets();
 
   // start receiving data
   bool start(String symbol, OnData onData, {OnError onError});

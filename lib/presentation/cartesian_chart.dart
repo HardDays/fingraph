@@ -26,8 +26,7 @@ class _CartesianChartState extends State<CartesianChart> {
         enablePanning: true,
         enableSelectionZooming: true,
         enableDoubleTapZooming: true,
-        enableMouseWheelZooming: true
-    );
+        enableMouseWheelZooming: true);
     _rp.iniData();
     super.initState();
   }
@@ -40,16 +39,13 @@ class _CartesianChartState extends State<CartesianChart> {
         padding: const EdgeInsets.all(8.0),
         child: SfCartesianChart(
             axisLabelFormatter: Util.tsFormatter,
-            primaryXAxis: DateTimeAxis(
-              dateFormat: DateFormat.Hms(),
-                intervalType: DateTimeIntervalType.seconds
-            ),
+            primaryXAxis: DateTimeAxis(dateFormat: DateFormat.Hms(), intervalType: DateTimeIntervalType.seconds),
             primaryYAxis: NumericAxis(
                 //minimum: 0.5,
                 // visibleMaximum: 2.0
                 //, visibleMinimum: 0.5
                 //anchorRangeToVisiblePoints: true
-            ),
+                ),
             title: ChartTitle(text: 'Cartesian chart'),
             legend: Legend(isVisible: false),
             tooltipBehavior: TooltipBehavior(enable: true),
@@ -57,9 +53,7 @@ class _CartesianChartState extends State<CartesianChart> {
             onActualRangeChanged: _actRange,
             zoomPanBehavior: _zoomPanBehavior,
             onZoomEnd: _zoomEnd,
-
-            enableAxisAnimation: true
-            ),
+            enableAxisAnimation: true),
       ),
       MinMax(context),
     ]);
@@ -85,14 +79,13 @@ class _CartesianChartState extends State<CartesianChart> {
       },
     );
   }
+
   //ChartActualRangeChangedCallback
   void _actRange(ActualRangeChangedArgs args) {
     if (args.orientation == AxisOrientation.horizontal) {
       print("* Cartesian _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
       _rp.setDTBorder(
-        DateTime.fromMillisecondsSinceEpoch(args.visibleMin),
-        DateTime.fromMillisecondsSinceEpoch(args.visibleMax)
-      );
+          DateTime.fromMillisecondsSinceEpoch(args.visibleMin), DateTime.fromMillisecondsSinceEpoch(args.visibleMax));
     }
     // if (args.orientation == AxisOrientation.vertical) {
     //   //print("* Cartesian _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
@@ -101,3 +94,4 @@ class _CartesianChartState extends State<CartesianChart> {
     // }
   }
 }
+

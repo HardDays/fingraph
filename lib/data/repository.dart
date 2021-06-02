@@ -1,28 +1,34 @@
 import 'dart:convert';
-import 'package:fingraph/model/tick.dart';
-import 'package:fingraph/model/wsmsg.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-import '../data/testdata_api.dart';
+import '../data/get_from_web.dart';
+import '../data/websocket_api.dart';
+import '../model/asset.dart';
+import '../model/request_args.dart';
+import '../model/wsmsg.dart';
 import '../model/dimension.dart';
 import '../model/src_api.dart';
+import '../utils/util.dart';
 
 enum TypeChart { Cartesian, Candle }
 
 class Repository with ChangeNotifier  {
-  final SrcApi src = TestData<Tick>();
-//  final SrcApi src = WebSocketSrc();
+//  final SrcApi src = TestData<Tick>();
+  final SrcApi src = WebSocketSrc();
 
+  List<Asset> assets = [];
   List<dynamic> chunkData = [];
 
   ChartSeriesController _controller;
   DateTime _dmin;
   DateTime _dmax;
-  String _symbol;
+  RequestArgs requestArgs = RequestArgs();
 
   bool _isStart = false;
   bool get isStart => _isStart;
+  bool _assetsReady = false;
+  bool get assetsReady => _assetsReady;
 
   DateTime get dmin => _dmin;
   DateTime get dmax => _dmax;
@@ -36,21 +42,36 @@ class Repository with ChangeNotifier  {
   void setChartController(ChartSeriesController c) => _controller = c;
 
   Repository() {
-    // получаем список доступных наборов данных (для выбора в дальнейшем)
-    //src.getAssets();
+    // getting available assets (to select later)
+    getAssets();
   }
 
-  void iniData() {
-    chunkData.clear();
-    // TODO реализовать выбор ассета из списка
-    _symbol = "tick.aud_usd_afx";
-    //setDTBorder(chunkData.first.d, chunkData.last.d);
+  void getAssets() {
+    this.assets.clear();
+    src.getAssets().then((_assets) {
+      this.assets = _assets;
+      _assetsReady = true;
+    }).catchError((error) => Util.ShowError("Ошибка получения наборов. Попробуйте позднее"));
   }
 
-  void onStartStop() {
+  void iniData() {}
+
+  Future<void> onStartStop() async {
     if(!_isStart) {
       chunkData.clear();
-      _isStart = src.start(_symbol, _onData, onError: _onError);
+      try {
+        // depth of historical set 2 minutes
+        requestArgs = RequestArgs(minutes: 2);
+        // start loading hist data
+        GetFromWeb.getHystoryTick(requestArgs)
+            .then(_onLoad)
+            .catchError(_onError);
+        // start receiving live data
+        _isStart = src.start(requestArgs.assetSymbol, _onData, onError: _onError);
+      } catch (e) {
+        print(e);
+        Util.ShowError("Ошибка загрузки данных. Повторите позднее");
+      }
     } else {
       _isStart = false;
       src.stop();
@@ -60,34 +81,46 @@ class Repository with ChangeNotifier  {
 
   void _onError(Object error) {
     _isStart = false;
+    src.stop();
     print("* repository._onError: $error");
     notifyListeners();
   }
 
+  // loading historical data
+  void _onLoad(List<dynamic> list) {
+    if(list.length > 0) {
+      List<int> adi = list.length == 0 ? [] : List.generate(list.length, (index) => index);
+      List<int> udi = chunkData.length == 0 ? [] : List.generate(chunkData.length, (index) => index + list.length);
+      try {
+        chunkData.insertAll(0, list);
+        _controller?.updateDataSource(addedDataIndexes: adi, updatedDataIndexes: udi);
+      } catch (e) {
+        Util.ShowError("* repository.onLoad.error: ${e.toString()}");
+      }
+    }
+  }
+
   // add a new item in list
   void _onData(dynamic jsonMsg) {
-    List<int> aDI = [];
-    List<int> rDI = [];
+    List<int> adi = [];
+    List<int> rdi = [];
 
     WsMsg wsMsg;
     Dimension value;
     try {
+      print("* reposotiry.onData: $jsonMsg");
       wsMsg = WsMsg.fromJson(json.decode(jsonMsg));
       value = wsMsg.params;
-      if(chunkData.length >= 50) {
-        chunkData.removeRange(0, 1);
-        rDI.add(0);
-      }
+      // if(chunkData.length >= 50) {
+      //   chunkData.removeRange(0, 1);
+      //   rdi.add(0);
+      // }
       chunkData.add(value);
-      aDI.add(chunkData.length-1);
-      _controller?.updateDataSource(addedDataIndexes: aDI, removedDataIndexes: rDI);
+      adi.add(chunkData.length-1);
+      _controller?.updateDataSource(addedDataIndexes: adi, removedDataIndexes: rdi);
       //_controller?.animate();
-
-      // при обновлении, должно вызываться через ChartActualRangeChangedCallback
-      // но если потребуется - добавить:
-      //setDTBorder(chunkData.first.d, chunkData.last.d);
     } catch (e) {
-      print("* repository.onData.error: ${e.toString()}");
+      Util.ShowError("* repository.onData.error: ${e.toString()}");
     }
   }
 
