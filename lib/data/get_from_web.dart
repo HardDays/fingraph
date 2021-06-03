@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart';
 
-import '../model/ohlc.dart';
-import '../model/request_args.dart';
-import '../model/tick.dart';
+// import '../model/ohlc.dart';
+// import '../model/request_args.dart';
+// import '../model/tick.dart';
 import '../utils/const.dart';
 
 class GetFromWeb {
@@ -28,23 +28,23 @@ class GetFromWeb {
     return jsonString;
   }
 
-  static Future<List<Tick>> getHystoryTick(RequestArgs ra) async {
-    List<Tick> data = [];
-    String url = kUrlHystory + ra.toString();
-    String jsonString = await getJsonWeb(url);
-    for (var a in json.decode(jsonString)) {
-      data.add(Tick.fromJson(a));
-    }
-    return data;
-  }
-
-  static Future<List<Ohlc>> getHystoryOhlc(RequestArgs ra) async {
-    List<Ohlc> data = [];
-    String url = kUrlHystory + ra.toString();
-    String jsonString = await getJsonWeb(url);
-    for (var a in json.decode(jsonString)) {
-      data.add(Ohlc.fromJson(a));
-    }
-    return data;
-  }
+  // static Future<List<Tick>> getHistoryTick(RequestArgs ra) async {
+  //   List<Tick> data = [];
+  //   String url = kUrlHystory + ra.toString();
+  //   String jsonString = await getJsonWeb(url);
+  //   for (var a in json.decode(jsonString)) {
+  //     data.add(Tick.fromJson(a));
+  //   }
+  //   return data;
+  // }
+  //
+  // static Future<List<Ohlc>> getHistoryOhlc(RequestArgs ra) async {
+  //   List<Ohlc> data = [];
+  //   String url = kUrlHystory + ra.toString();
+  //   String jsonString = await getJsonWeb(url);
+  //   for (var a in json.decode(jsonString)) {
+  //     data.add(Ohlc.fromJson(a));
+  //   }
+  //   return data;
+  // }
 }

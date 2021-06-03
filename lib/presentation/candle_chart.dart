@@ -1,9 +1,11 @@
 import 'dart:math';
+import 'package:fingraph/model/dimension_type.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../data/repository.dart';
-import '../model/ohlc.dart';
+import 'minmax_widget.dart';
 
 class CandleChart extends StatefulWidget {
   final Repository rp;
@@ -28,7 +30,7 @@ class _CandleChartState extends State<CandleChart> {
         enableDoubleTapZooming: true,
         enableMouseWheelZooming: true
     );
-    _rp.iniData();
+    _rp.iniData(DimensionType.ohlc);
     super.initState();
   }
 
@@ -40,34 +42,34 @@ class _CandleChartState extends State<CandleChart> {
         padding: const EdgeInsets.all(8.0),
         child: SfCartesianChart(
           //axisLabelFormatter: Util.tsFormatter,
-          primaryXAxis: DateTimeAxis(),
+          primaryXAxis: DateTimeAxis(dateFormat: DateFormat.Hms(), intervalType: DateTimeIntervalType.seconds),
           title: ChartTitle(text: 'Candle chart'),
           legend: Legend(isVisible: false),
           tooltipBehavior: TooltipBehavior(enable: true),
-          series: <ChartSeries<Ohlc, DateTime>>[_getData()],
+          series: <ChartSeries<dynamic, DateTime>>[_getData()],
           onActualRangeChanged: _actRange,
           zoomPanBehavior: _zoomPanBehavior,
           onZoomEnd: _zoomEnd,
         ),
       ),
-      //MinMax(context),
+      MinMax(context),
     ]);
   }
 
   void _zoomEnd(ZoomPanArgs args) {
     if (args.axis is DateTimeAxis) {
-      setState(() {});
+      //setState(() {});
     }
   }
 
-  CandleSeries<Ohlc, DateTime> _getData() {
+  CandleSeries<dynamic, DateTime> _getData() {
     return CandleSeries(
         dataSource: _rp.chunkData,
-        xValueMapper: (Ohlc sales, _) => sales.d, // sales.d.toIso8601String(),
-        lowValueMapper: (Ohlc sales, _) => sales.l,
-        highValueMapper: (Ohlc sales, _) => sales.h,
-        openValueMapper: (Ohlc sales, _) => sales.o,
-        closeValueMapper: (Ohlc sales, _) => sales.c,
+        xValueMapper: (dynamic sales, _) => sales.d, // sales.d.toIso8601String(),
+        lowValueMapper: (dynamic sales, _) => sales.l,
+        highValueMapper: (dynamic sales, _) => sales.h,
+        openValueMapper: (dynamic sales, _) => sales.o,
+        closeValueMapper: (dynamic sales, _) => sales.c,
       name: 'Sales',
       dataLabelSettings: DataLabelSettings(isVisible: false),
       onRendererCreated: (ChartSeriesController controller) {
@@ -79,7 +81,7 @@ class _CandleChartState extends State<CandleChart> {
   //ChartActualRangeChangedCallback
    void _actRange(ActualRangeChangedArgs args) {
     if (args.orientation == AxisOrientation.horizontal) {
-      print("* Candle _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
+      //print("* Candle _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
       _rp.setDTBorder(
           DateTime.fromMillisecondsSinceEpoch(args.visibleMin),
           DateTime.fromMillisecondsSinceEpoch(args.visibleMax)

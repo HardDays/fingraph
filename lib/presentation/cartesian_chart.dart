@@ -1,3 +1,4 @@
+import 'package:fingraph/model/dimension_type.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -27,7 +28,7 @@ class _CartesianChartState extends State<CartesianChart> {
         enableSelectionZooming: true,
         enableDoubleTapZooming: true,
         enableMouseWheelZooming: true);
-    _rp.iniData();
+    _rp.iniData(DimensionType.tick);
     super.initState();
   }
 
@@ -61,7 +62,7 @@ class _CartesianChartState extends State<CartesianChart> {
 
   void _zoomEnd(ZoomPanArgs args) {
     if (args.axis is DateTimeAxis) {
-      setState(() {});
+      //setState(() {});
     }
   }
 
@@ -71,8 +72,8 @@ class _CartesianChartState extends State<CartesianChart> {
       xValueMapper: (dynamic tick, _) => tick.d,
       yValueMapper: (dynamic tick, _) => tick.q,
       name: 'Sales',
-      markerSettings: MarkerSettings(
-          isVisible: true, height: 4, width: 4, shape: DataMarkerType.circle, borderWidth: 2, borderColor: Colors.red),
+      // markerSettings: MarkerSettings(
+      //     isVisible: true, height: 4, width: 4, shape: DataMarkerType.circle, borderWidth: 2, borderColor: Colors.red),
       dataLabelSettings: DataLabelSettings(isVisible: false),
       onRendererCreated: (ChartSeriesController controller) {
         _rp.setChartController(controller);
@@ -83,7 +84,7 @@ class _CartesianChartState extends State<CartesianChart> {
   //ChartActualRangeChangedCallback
   void _actRange(ActualRangeChangedArgs args) {
     if (args.orientation == AxisOrientation.horizontal) {
-      print("* Cartesian _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
+      //print("* Cartesian _actRange() visibleMinD=${args.visibleMin}, visibleMaxD=${args.visibleMax}");
       _rp.setDTBorder(
           DateTime.fromMillisecondsSinceEpoch(args.visibleMin), DateTime.fromMillisecondsSinceEpoch(args.visibleMax));
     }

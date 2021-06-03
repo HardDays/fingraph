@@ -68,7 +68,10 @@ class _PagesState extends State<Pages> {
           BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: "Cartesian"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Candle")
         ],
-        onTap: (page) => _pageController.jumpToPage(page),
+        onTap: (page) {
+          _rp.chunkData.clear();
+          _pageController.jumpToPage(page);
+        },
         currentIndex: _page,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,

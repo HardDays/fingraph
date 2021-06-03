@@ -26,8 +26,8 @@ class Tick extends Dimension {
   factory Tick.rand(DateTime dt) {
     return Tick(
         i: 10,
-        d: dt.add(Dimension.addDt),
-        q: (0.90 + (Random().nextInt(90).toDouble() / 1000))
+        d: dt, //.add(Dimension.addDt),
+        q: (0.946 + (Random().nextInt(99).toDouble() / 1000000))
     );
   }
 

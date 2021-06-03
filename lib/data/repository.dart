@@ -1,21 +1,25 @@
 import 'dart:convert';
+import 'package:fingraph/model/dimension_type.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-import '../data/get_from_web.dart';
+import '../data/testdata_api.dart';
 import '../data/websocket_api.dart';
+import '../model/tick.dart';
 import '../model/asset.dart';
 import '../model/request_args.dart';
 import '../model/wsmsg.dart';
 import '../model/dimension.dart';
 import '../model/src_api.dart';
 import '../utils/util.dart';
+import '../utils/const.dart';
 
 enum TypeChart { Cartesian, Candle }
 
 class Repository with ChangeNotifier  {
-//  final SrcApi src = TestData<Tick>();
-  final SrcApi src = WebSocketSrc();
+
+  // TODO В интерфейсе нужно сделать переключатель источника данных
+  final SrcApi src = kTestData ? TestData<Tick>() : WebSocketSrc();
 
   List<Asset> assets = [];
   List<dynamic> chunkData = [];
@@ -36,7 +40,12 @@ class Repository with ChangeNotifier  {
   void setDTBorder(DateTime min, DateTime max) {
     _dmin = min ?? DateTime(2021);
     _dmax = max ?? DateTime(2021);
-    //notifyListeners();
+    // реально данные (dmin, dmax) актуальные, но отобразить их не получилось пока
+    // при включении: ошибка при инициализации графика (нужно убрать вызов setState() в графике)
+    // notifyListeners();
+    if(_isStart) {
+      notifyListeners();
+    }
   }
 
   void setChartController(ChartSeriesController c) => _controller = c;
@@ -44,6 +53,12 @@ class Repository with ChangeNotifier  {
   Repository() {
     // getting available assets (to select later)
     getAssets();
+  }
+
+  void iniData(DimensionType dtype) {
+    this.assets.clear();
+    requestArgs = RequestArgs(type: dtype);
+    src.requestArgs = requestArgs;
   }
 
   void getAssets() {
@@ -54,16 +69,14 @@ class Repository with ChangeNotifier  {
     }).catchError((error) => Util.ShowError("Ошибка получения наборов. Попробуйте позднее"));
   }
 
-  void iniData() {}
-
   Future<void> onStartStop() async {
     if(!_isStart) {
       chunkData.clear();
       try {
         // depth of historical set 2 minutes
-        requestArgs = RequestArgs(minutes: 2);
+        requestArgs.minutes = 2;
         // start loading hist data
-        GetFromWeb.getHystoryTick(requestArgs)
+        src.getHistory(requestArgs)
             .then(_onLoad)
             .catchError(_onError);
         // start receiving live data
@@ -88,6 +101,7 @@ class Repository with ChangeNotifier  {
 
   // loading historical data
   void _onLoad(List<dynamic> list) {
+    print("* repository.onLoad");
     if(list.length > 0) {
       List<int> adi = list.length == 0 ? [] : List.generate(list.length, (index) => index);
       List<int> udi = chunkData.length == 0 ? [] : List.generate(chunkData.length, (index) => index + list.length);
@@ -102,22 +116,16 @@ class Repository with ChangeNotifier  {
 
   // add a new item in list
   void _onData(dynamic jsonMsg) {
-    List<int> adi = [];
-    List<int> rdi = [];
-
     WsMsg wsMsg;
     Dimension value;
     try {
-      print("* reposotiry.onData: $jsonMsg");
+//      print("* repository.onData: $jsonMsg");
       wsMsg = WsMsg.fromJson(json.decode(jsonMsg));
       value = wsMsg.params;
-      // if(chunkData.length >= 50) {
-      //   chunkData.removeRange(0, 1);
-      //   rdi.add(0);
-      // }
       chunkData.add(value);
-      adi.add(chunkData.length-1);
-      _controller?.updateDataSource(addedDataIndexes: adi, removedDataIndexes: rdi);
+      List<int> adi = [chunkData.length-1];
+      List<int> udi = chunkData.length == 0 ? [] : List.generate(chunkData.length-1, (index) => index);
+      _controller?.updateDataSource(addedDataIndexes: adi, updatedDataIndexes: udi);
       //_controller?.animate();
     } catch (e) {
       Util.ShowError("* repository.onData.error: ${e.toString()}");

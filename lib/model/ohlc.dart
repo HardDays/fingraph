@@ -31,10 +31,10 @@ class Ohlc extends Dimension {
   factory Ohlc.rand(DateTime dt) {
     // {"d":1620345600000,"o":0.94661,"h":0.94671,"l":0.94647, "c":0.94659}
     var _rand = Random();
-    double o = (0.94 + ((_rand.nextInt(90).toDouble() - 45.0) / 1000));
-    double h = (0.94 + ((_rand.nextInt(90).toDouble() - 45.0) / 1000));
-    double l = (0.94 + ((_rand.nextInt(90).toDouble() - 45.0) / 1000));
-    double c = (0.94 + ((_rand.nextInt(90).toDouble() - 45.0) / 1000));
+    double o = (0.9465 + ((_rand.nextInt(99).toDouble() - 45.0) / 1000000));
+    double h = (0.9465 + ((_rand.nextInt(99).toDouble() - 45.0) / 1000000));
+    double l = (0.9465 + ((_rand.nextInt(99).toDouble() - 45.0) / 1000000));
+    double c = (0.9465 + ((_rand.nextInt(99).toDouble() - 45.0) / 1000000));
     // normalized random values for canle chart
     List<double> ls = [o, h, l, c];
     ls.sort();
@@ -46,7 +46,7 @@ class Ohlc extends Dimension {
     c = ls[j + 1];
 
     return Ohlc(
-      d: dt.add(Dimension.addDt),
+      d: dt, //dt.add(Dimension.addDt),
       o: o, h: h, l: l, c: c
     );
   }
